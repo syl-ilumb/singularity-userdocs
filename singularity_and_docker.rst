@@ -1,432 +1,123 @@
-.. _singularity-and-docker:
+============================
+Singularity Interoperability
+============================
 
-======================
-Singularity and Docker
-======================
+.. TODO Singularity Hub ? 
 
-Singularity can be used with Docker images. This feature was included because
-developers use and really like using Docker and scientists have already
-put much resources into creating Docker images. Thus, one of our early goals was to support Docker. What can you do?
+--------
+Overview
+--------
 
--  You don’t need Docker installed
+.. TODO Overview content ... 
 
--  You can shell into a Singularity-ized Docker image
+.. TODO relocate below ??? 
 
--  You can run a Docker image instantly as a Singularity image
-
--  You can pull a Docker image (without sudo)
-
--  You can build images with bases from assembled Docker layers that
-   include environment, guts, and labels
-
----------------------------
-TLDR (Too Long Didn’t Read)
----------------------------
-
-You can shell, import, run, and exec Docker images directly from the Docker Registry.
-
-.. code-block:: none
-
-    singularity shell docker://ubuntu:latest
-
-    singularity run docker://ubuntu:latest
-
-    singularity exec docker://ubuntu:latest echo "Hello Dinosaur!"
+.. Review the overview of the Sy interface ... 
 
 
-    singularity pull docker://ubuntu:latest
+.. ------------------------------------------
+.. Making use of pre-built Singularity images
+.. ------------------------------------------
 
-    singularity build ubuntu.img docker://ubuntu:latest
+.. SHUB and NVIDIA ... 
 
 
-----------------------------------------------
-Import a Docker image into a Singularity Image
-----------------------------------------------
+----------------------------
+Interoperability with Docker
+----------------------------
 
-The core of a Docker image is basically a compressed set of files, a set
-of ``.tar.gz`` that (if you look in your `Docker image folder <http://stackoverflow.com/questions/19234831/where-are-docker-images-stored-on-the-host-machine>`_ on your host
-machine, you will see the files. The Docker Registry, which you probably interact
-with via `Docker Hub <https://hub.docker.com/>`_, serves these layers. These are the layers that
-you see downloading when you interact with the docker daemon. We are
-going to use these same layers for Singularity!
 
---------------------------------
-Quick Start: The Docker Registry
---------------------------------
+Making use of pre-built images from the Docker Hub
+==================================================
 
-The Docker engine communicates with the Docker Hub via the `Docker
-Remote API <https://docs.docker.com/engine/reference/api/docker_remote_api/>`_, and so can Singularity. The easiest thing to do is
-create an image, and then pipe a Docker image directly into it from
-the Docker Registry. You don’t need Docker installed on your machine,
-but you will need a working Internet connection. Let’s create an
-ubuntu operating system, from Docker. We will pull, then build:
+Singularity can make use of pre-built images available from the `Docker Hub <https://hub.docker.com/>`_. By specifying the ``docker://`` URI for an image you have already located, Singularity can ``pull``  it - e.g.: 
 
 .. code-block:: none
 
-    singularity pull docker://ubuntu
+    $ singularity pull docker://godlovedc/lolcow
+    WARNING: Authentication token file not found : Only pulls of public images will succeed
+    INFO:    Starting build...
+    Getting image source signatures
+    Copying blob sha256:9fb6c798fa41e509b58bccc5c29654c3ff4648b608f5daa67c1aab6a7d02c118
+     45.33 MiB / 45.33 MiB [====================================================] 2s
+    Copying blob sha256:3b61febd4aefe982e0cb9c696d415137384d1a01052b50a85aae46439e15e49a
+     848 B / 848 B [============================================================] 0s
+    Copying blob sha256:9d99b9777eb02b8943c0e72d7a7baec5c782f8fd976825c9d3fb48b3101aacc2
+     621 B / 621 B [============================================================] 0s
+    Copying blob sha256:d010c8cf75d7eb5d2504d5ffa0d19696e8d745a457dd8d28ec6dd41d3763617e
+     853 B / 853 B [============================================================] 0s
+    Copying blob sha256:7fac07fb303e0589b9c23e6f49d5dc1ff9d6f3c8c88cabe768b430bdb47f03a9
+     169 B / 169 B [============================================================] 0s
+    Copying blob sha256:8e860504ff1ee5dc7953672d128ce1e4aa4d8e3716eb39fe710b849c64b20945
+     53.75 MiB / 53.75 MiB [====================================================] 3s
+    Copying config sha256:73d5b1025fbfa138f2cacf45bbf3f61f7de891559fa25b28ab365c7d9c3cbd82
+     3.33 KiB / 3.33 KiB [======================================================] 0s
+    Writing manifest to image destination
+    Storing signatures
+    INFO:    Creating SIF file...
+    INFO:    Build complete: lolcow_latest.sif
 
-    WARNING: pull for Docker Hub is not guaranteed to produce the
-
-    WARNING: same image on repeated pull. Use Singularity Registry
-
-    WARNING: (shub://) to pull exactly equivalent images.
-
-    Docker image path: index.docker.io/library/ubuntu:latest
-
-    Cache folder set to /home/vanessa/.singularity/docker
-
-    [5/5] |===================================| 100.0%
-
-    Importing: base Singularity environment
-
-    Importing: /home/vanessa/.singularity/docker/sha256:9fb6c798fa41e509b58bccc5c29654c3ff4648b608f5daa67c1aab6a7d02c118.tar.gz
-
-    Importing: /home/vanessa/.singularity/docker/sha256:3b61febd4aefe982e0cb9c696d415137384d1a01052b50a85aae46439e15e49a.tar.gz
-
-    Importing: /home/vanessa/.singularity/docker/sha256:9d99b9777eb02b8943c0e72d7a7baec5c782f8fd976825c9d3fb48b3101aacc2.tar.gz
-
-    Importing: /home/vanessa/.singularity/docker/sha256:d010c8cf75d7eb5d2504d5ffa0d19696e8d745a457dd8d28ec6dd41d3763617e.tar.gz
-
-    Importing: /home/vanessa/.singularity/docker/sha256:7fac07fb303e0589b9c23e6f49d5dc1ff9d6f3c8c88cabe768b430bdb47f03a9.tar.gz
-
-    Importing: /home/vanessa/.singularity/metadata/sha256:77cece4ce6ef220f66747bb02205a00d9ca5ad0c0a6eea1760d34c744ef7b231.tar.gz
-
-    WARNING: Building container as an unprivileged user. If you run this container as root
-
-    WARNING: it may be missing some functionality.
-
-    Building Singularity image...
-
-    Cleaning up...
-
-    Singularity container built: ./ubuntu.img
-
-
-The warnings are reminding you that you are creating the
-image on the fly from layers, and if one of those layers changes, you
-won’t produce the same image next time.
-
------------------------------------------
-The Build Specification file, Singularity
------------------------------------------
-
-Just like Docker has the Dockerfile, Singularity has a file called
-Singularity that (currently) applications like Singularity Hub know to
-find. For reproducibility of your containers, our strong
-recommendation is that you build from these files. Any command that you
-issue to change a container sandbox (building with ``--sandbox`` ) or to a build with ``--writable``
-is by default not recorded, and your container loses its
-reproducibility. The following are steps to these files. First,
-let’s look at the absolute minimum requirement:
+This ``pull`` results in a *local* copy of the Docker image in SIF, the Singularity Image Format:
 
 .. code-block:: none
 
-    Bootstrap: docker
+    $ file lolcow_latest.sif 
+    lolcow_latest.sif: a /usr/bin/env run-singularity script executable (binary data)
 
-    From: ubuntu
+In translating to SIF, individual layers of the Docker image have been *combined* into a single, native file for use via Singularity; there is no need to subsequently ``build`` the image for Singularity. For example, you can now ``exec``, ``run`` or ``shell`` into the SIF version via Singularity. See :ref:`Interact with images<quick-start>`_. 
 
+.. TODO improve ref above to quick start ... interact 
 
-We save this content to a file called Singularity and then issue
-the following commands to bootstrap the image from the file:
+.. note:: 
 
-.. code-block:: none
+    The above authentication warning originates from a check for the existence of ``${HOME}/.singularity/sylabs-token``. It can be ignored when making use of the Docker Hub. 
 
-    sudo singularity build ubuntu.img Singularity
+.. note:: 
 
-A particular tag or version can be added to the docker uri:
+    ``singularity search [search options...] <search query>`` does *not* support the `Docker Hub <https://hub.docker.com/>`_. Use the search box at the Docker Hub to locate Docker images. Docker ``pull`` commands, e.g., ``docker pull godlovedc/lolcow``, can be easily translated into the corresponding command for Singularity. The Docker ``pull`` command is available under "DETAILS" for a given image on the Docker Hub. 
 
-.. code-block:: none
+``inspect`` reveals metadata for the container encapsulated via SIF:
 
-    Bootstrap: docker
+.. code-block::
 
-    From: ubuntu:latest
+        $ singularity inspect lolcow_latest.sif 
 
+    {
+        "org.label-schema.build-date": "Thursday_6_December_2018_17:29:48_UTC",
+        "org.label-schema.schema-version": "1.0",
+        "org.label-schema.usage.singularity.deffile.bootstrap": "docker",
+        "org.label-schema.usage.singularity.deffile.from": "godlovedc/lolcow",
+        "org.label-schema.usage.singularity.version": "3.0.1-40.g84083b4f"
+    }
+
+SIF files built from Docker images are *not* crytographically signed:
+
+.. code-block::
+
+    $ singularity verify lolcow_latest.sif 
+    Verifying image: lolcow_latest.sif
+    ERROR:   verification failed: error while searching for signature blocks: no signatures found for system partition
+
+.. TODO Need to fix ref below ... 
+
+The ``sign`` command allows a cryptographic signature to be added. Refer to :ref:`Signing and Verifying Containers <signNverify>` for details. 
 
 .. note::
 
-    Note that the default is ``latest`` . If you want to customize the Registry or
-    Namespace, just add those to the header:
+    It is a recommended best practice that SIF files be signed. This applies to those that originate as Docker images. 
 
-.. code-block:: none
+.. note::
 
-    Bootstrap: docker
+    ``pull`` creates a SIF file that corresponds to the image you retrieved from the Docker Hub. Updates to the image on the Docker Hub will *not* be reflected in your *local* copy. 
 
-    From: ubuntu
+In our example ``docker://godlovedc/lolcow``, ``godlovedc`` specifies a Docker Hub user, whereas ``lolcow`` is the name of the repository. Adding the option to specifiy an image tag, the generic version of the URI is ``docker://<hub-user>/<repo-name>[:<tag>]``. `Repositories on Docker Hub <https://docs.docker.com/docker-hub/repos/>`_ provides additional details.
 
-    Registry: pancakes.registry.index.io
 
-    Namespace: blue/berry/cream
+.. What about a private Docker repo ??? 
+.. TODO What about private Docker registries? How does signing/verification work in that case? 
 
 
-The power of build comes with the other things that you can do. This
-means running specific install commands, specifying your containers
-runscript (what it does when you execute it), adding files, labels, and
-customizing the environment. Here is a full Singularity file:
 
-.. code-block:: none
+.. TODO Account for locally cached Docker images - further research required ...  
 
-    Bootstrap: docker
 
-    From: tensorflow/tensorflow:latest
-
-
-    %runscript
-
-        exec /usr/bin/python "$@"
-
-
-    %post
-
-        echo "Post install stuffs!"
-
-
-    %files
-
-    /home/vanessa/Desktop/analysis.py /tmp/analysis.py
-
-    relative_path.py /tmp/analysis2.py
-
-
-    %environment
-
-    TOPSECRET=pancakes
-
-    HELLO=WORLD
-
-    export HELLO TOPSECRET
-
-
-    %labels
-
-    AUTHOR Vanessasaur
-
-
-In the example above, I am overriding any Dockerfile ``ENTRYPOINT`` or ``CMD`` because I have
-defined a ``%runscript`` . If I want the Dockerfile ``ENTRYPOINT`` to take preference, I would remove
-the ``%runscript`` section. If I want to use ``CMD`` instead of ``ENTRYPOINT`` , I would again remove the
-runscript, and add IncludeCmd to the header:
-
-.. code-block:: none
-
-    Bootstrap: docker
-
-    From: tensorflow/tensorflow:latest
-
-    IncludeCmd: yes
-
-
-    %post
-
-
-        echo "Post install stuffs!"
-
-
-You can commit this Singularity file to a GitHub repo
-and it will automatically build for you when you push to `Singularity
-Hub <https://singularity-hub.org/>`_?. This step will ensure maximum reproducibility of your work.
-
-----------------------------
-How does the runscript work?
-----------------------------
-
-Docker has two commands in the ``Dockerfile`` that have something to do with
-execution, ``CMD`` and ``ENTRYPOINT``. The differences are subtle, but the a good description is the following:
-
-    A ``CMD`` is to provide defaults for an executing container.
-
-and
-
-    An ``ENTRYPOINT`` helps you to configure a container that you can run as an
-    executable.
-
-Given the definition, the ``ENTRYPOINT`` is most appropriate for the Singularity ``%runscript`` , and
-so using the default bootstrap (whether from a ``docker://`` endpoint or a ``Singularity`` spec file)
-will set the ``ENTRYPOINT`` variable as the runscript. You can change this behavior by
-specifying ``IncludeCmd: yes`` in the Spec file (see below). If you provide any sort of ``%runscript`` in
-your Spec file, this overrides anything provided in Docker. In summary,
-the order of operations is as follows:
-
-#. If a ``%runscript`` is specified in the Singularity spec file, this takes prevalence
-   over all
-
-#. If no ``%runscript`` is specified, or if the ``import`` command is used as in the example
-   above, the ``ENTRYPOINT`` is used as runscript.
-
-#. If no ``%runscript`` is specified, but the user has a ``Singularity`` spec with ``IncludeCmd`` , then the Docker ``CMD`` is
-   used.
-
-#. If no ``%runscript`` is specified, and there is no ``CMD`` or ``ENTRYPOINT`` , the image’s default
-   execution action is to run the bash shell.
-
----------------------------------
-How do I specify my Docker image?
----------------------------------
-
-In the example above, you probably saw that we referenced the docker
-image first with the uri ``docker://`` and that is important to tell Singularity that
-it will be pulling Docker layers. To ask for ubuntu, we asked for ``docker://ubuntu`` . This
-uri that we give to Singularity is going to be very important to choose
-the following Docker metadata items:
-
--  registry (e.g., “index.docker.io”)
-
--  namespace (e.g., “library”)
-
--  repository (e.g., “ubuntu”)
-
--  tag (e.g., “latest”) OR version (e.g., "@sha256:1234…)
-
-When we put those things together, it looks like this:
-
-.. code-block:: none
-
-    docker://<registry>/<namespace>/<repo_name>:<repo_tag>
-
-By default, the minimum requirement is that you specify a repository
-name (eg, ubuntu) and it will default to the following:
-
-.. code-block:: none
-
-    docker://index.docker.io/library/ubuntu:latest
-
-If you provide a version instead of a tag, that will be used instead:
-
-.. code-block:: none
-
-    docker://index.docker.io/library/ubuntu@sha256:1235...
-
-You can have one or the other, both are considered a “digest” in
-Docker speak.
-
-If you want to change any of those fields and are having trouble with
-the uri, you can also just state them explicitly:
-
-.. code-block:: none
-
-    Bootstrap: docker
-
-    From: ubuntu
-
-    Registry: index.docker.io
-
-    Namespace: library
-
-
----------------------
-Custom Authentication
----------------------
-
-For both import and build using a build spec file, by default we use
-the Docker Registry ``index.docker.io`` . Singularity first tries the call without a
-token, and then asks for one with pull permissions if the request is
-defined. However, it may be the case that you want to provide a custom
-token for a private registry. You have two options. You can either
-provide a ``Username`` and ``Password`` in the build specification file (if stored locally and
-there is no need to share), or (in the case of doing an import or
-needing to secure the credentials) you can export these variables to
-environmental variables. We provide instructions for each of these
-cases:
-
-Authentication in the Singularity Build File
-============================================
-
-You can simply specify your additional authentication parameters in the
-header with the labels ``Username`` and ``Password`` :
-
-.. code-block:: none
-
-    Username: vanessa
-
-    Password: [password]
-
-
-Again, this can be in addition to specification of a custom registry
-with the ``Registry`` parameter.
-
-Authentication in the Environment
-=================================
-
-You can export your username, and password for Singularity as follows:
-
-.. code-block:: none
-
-    export SINGULARITY_DOCKER_USERNAME=vanessasaur
-
-    export SINGULARITY_DOCKER_PASSWORD=rawwwwwr
-
-Testing Authentication
-======================
-
-If you are having trouble, you can test your token by obtaining it on
-the command line and putting it into an environmental variable, ``CREDENTIAL`` :
-
-.. code-block:: none
-
-    CREDENTIAL=$(echo -n vanessa:[password] | base64)
-
-    TOKEN=$(http 'https://auth.docker.io/token?service=registry.docker.io&scope=repository:vanessa/code-samples:pull' Authorization:"Basic $CREDENTIAL" | jq -r '.token')
-
-This should place the token in the environmental variable ``TOKEN`` . To test that
-your token is valid, you can do the following
-
-.. code-block:: none
-
-    http https://index.docker.io/v2/vanessa/code-samples/tags/list Authorization:"Bearer $TOKEN"
-
-The above call should return the tags list as expected. And of course
-you should change the repository (repo) name to be one that actually exists that you
-have credentials for.
-
---------------
-Best Practices
---------------
-
-While most docker images can import and run without a hitch, there are
-some special cases for which things can go wrong. Here is a general list
-of suggested practices, and if you discover a new one in your building
-ventures please `let us know <https://github.com/sylabs/singularity/issues>`_.
-
-1. Installation to Root
-=======================
-
-When using Docker, you typically run as root, meaning that root’s home
-at ``/root`` is where things will install given a specification of home. This situation is
-fine when you stay in Docker, or if the content at ``/root`` doesn’t need any
-kind of write access, but generally it can lead to a lot of bugs because
-it is, after all, root’s home. This leads us to best practice #1.
-
-Don’t install anything to root’s home, ``/root``.
-
-2. Library Configurations
-=========================
-
-The command `ldconfig <https://codeyarns.com/2014/01/14/how-to-add-library-directory-to-ldconfig-cache/>`_ is used to update the shared library cache. If
-you have software that requires symbolic linking of libraries and you
-do the installation without updating the cache, then the Singularity
-image (in read only) will likely give you an error that the library is
-not found. If you look in the image, the library will exist but the
-symbolic link will not. This leads us to best practice #2:
-
-Update the library cache at the end of your Dockerfile with a call
-to ldconfig.
-
-3. Don't install to $HOME or $TMP
-=================================
-
-We can assume that the most common Singularity use case has the $USER
-home being automatically mounted to ``$HOME``, and ``$TMP`` also mounted. Thus, given
-the potential for some kind of conflict or missing files, for best
-practice #3 we suggest the following:
-
-Don’t put container valuables in ``$TMP`` or ``$HOME``
-
-Have any more best practices? Please `let us know <https://github.com/sylabs/singularity/issues>`_!
-
----------------
-Troubleshooting
----------------
-
-Why won’t my image build work? If you can’t find an answer on this documentation,
-please `send us an issue <https://github.com/sylabs/singularity/issues>`_. If you’ve found an answer and you’d like to
-see it on the site for others to benefit from, then post to us
-`here <https://github.com/sylabs/singularity/issues>`__.
