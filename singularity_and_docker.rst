@@ -1,8 +1,11 @@
-============================
-Singularity Interoperability
-============================
+=====================================
+Singularity and Docker/OCI containers
+=====================================
 
-.. TODO Singularity Hub ? 
+.. TODO Singularity Hub ? <-- I would not worry about either Singularity Hub or
+    .. the contaienr library on this page.  Both of those host containers that are 
+    .. in native Singularity formats.  I think this page is more for interacting 
+    .. with things in Docker or OCI format.  (feel free to delete comment.)
 
 --------
 Overview
@@ -25,6 +28,13 @@ Overview
 ----------------------------
 Interoperability with Docker
 ----------------------------
+
+Running action commands on Docker Hub images
+============================================
+
+.. info about shell, run, and exec on Docker Hub images
+.. explanation that layers are downloaded and then "spatted out to disk" to 
+    .. create an ephemeral Singularity container in which commands are run
 
 
 Making use of pre-built images from the Docker Hub
@@ -67,6 +77,13 @@ This ``pull`` results in a *local* copy of the Docker image in SIF, the Singular
 In translating to SIF, individual layers of the Docker image have been *combined* into a single, native file for use via Singularity; there is no need to subsequently ``build`` the image for Singularity. For example, you can now ``exec``, ``run`` or ``shell`` into the SIF version via Singularity. See :ref:`Interact with images<quick-start>`_. 
 
 .. TODO improve ref above to quick start ... interact 
+    .. Should explain here or in previous section that docker to Singularity is 
+    .. a one-way operation because info is lost.
+    .. Also some workds on how this is considered less reproducible than pulling
+    .. from the container library.  
+    .. Also should talk about how a build and a pull are really the same thing
+    .. under the hood.  Both are really "builds" in the sense that the layers 
+    .. are built into a Singularity image.
 
 .. note:: 
 
@@ -74,7 +91,7 @@ In translating to SIF, individual layers of the Docker image have been *combined
 
 .. note:: 
 
-    ``singularity search [search options...] <search query>`` does *not* support the `Docker Hub <https://hub.docker.com/>`_. Use the search box at the Docker Hub to locate Docker images. Docker ``pull`` commands, e.g., ``docker pull godlovedc/lolcow``, can be easily translated into the corresponding command for Singularity. The Docker ``pull`` command is available under "DETAILS" for a given image on the Docker Hub. 
+    ``singularity search [search options...] <search query>`` does *not* support Docker registries like `Docker Hub <https://hub.docker.com/>`_. Use the search box at Docker Hub to locate Docker images. Docker ``pull`` commands, e.g., ``docker pull godlovedc/lolcow``, can be easily translated into the corresponding command for Singularity. The Docker ``pull`` command is available under "DETAILS" for a given image on Docker Hub. 
 
 ``inspect`` reveals metadata for the container encapsulated via SIF:
 
@@ -100,16 +117,19 @@ SIF files built from Docker images are *not* crytographically signed:
 
 .. TODO Need to fix ref below ... 
 
-The ``sign`` command allows a cryptographic signature to be added. Refer to :ref:`Signing and Verifying Containers <signNverify>` for details. 
+The ``sign`` command allows a cryptographic signature to be added. Refer to 
+:ref:`Signing and Verifying Containers <signNverify>` for details. But caution
+should be exercised in signing images from Docker Hub because, unless you build
+an image from scratch (OS mirrors) you are probably not really sure about the
+complete contents of that image. 
 
 .. note::
 
-    It is a recommended best practice that SIF files be signed. This applies to those that originate as Docker images. 
+    ``pull`` actually builds a SIF file that corresponds to the image you retrieved from the Docker Hub. Updates to the image on the Docker Hub will *not* be reflected in your *local* copy. 
 
-.. note::
-
-    ``pull`` creates a SIF file that corresponds to the image you retrieved from the Docker Hub. Updates to the image on the Docker Hub will *not* be reflected in your *local* copy. 
-
+.. the line below should probaby be added to a larger discussion in which the 
+.. entire URI is explained.  I think the existing explanation is pretty good,
+.. but probably needs style edits. 
 In our example ``docker://godlovedc/lolcow``, ``godlovedc`` specifies a Docker Hub user, whereas ``lolcow`` is the name of the repository. Adding the option to specifiy an image tag, the generic version of the URI is ``docker://<hub-user>/<repo-name>[:<tag>]``. `Repositories on Docker Hub <https://docs.docker.com/docker-hub/repos/>`_ provides additional details.
 
 
@@ -119,5 +139,22 @@ In our example ``docker://godlovedc/lolcow``, ``godlovedc`` specifies a Docker H
 
 
 .. TODO Account for locally cached Docker images - further research required ...  
+
+.. I suggest the following additional topics to round the page out.  Maybe we can 
+.. carve off topics and work on the page together.
+.. 
+.. Using docker bootstrap agent in a def file (link to appendix)
+..     Must figure out all of the CMD and ENTRYPOINT stuff.  afaik it has changed?
+.. The breakdown of the URI is useful and should be retained (but edited)
+..     https://www.sylabs.io/guides/2.6/user-guide/singularity_and_docker.html#how-do-i-specify-my-docker-image
+.. Using custom authentication for a private Docker Hub repo (may need to set one
+..     up for testing)
+.. Using a different registry.  quay.io would provide a good example
+.. How to use nvidia's cloud
+.. build a singularity container from local docker images (ask Ian and/or Michael)
+..     running in daemon
+..     sitting on host 
+.. build from an OCI bundle (ask Ian and/or Michael.)
+.. The best practices section is also useful and should likely be retained
 
 
