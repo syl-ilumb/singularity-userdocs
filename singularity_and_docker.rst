@@ -74,7 +74,7 @@ This ``pull`` results in a *local* copy of the Docker image in SIF, the Singular
     $ file lolcow_latest.sif 
     lolcow_latest.sif: a /usr/bin/env run-singularity script executable (binary data)
 
-In translating to SIF, individual layers of the Docker image have been *combined* into a single, native file for use via Singularity; there is no need to subsequently ``build`` the image for Singularity. For example, you can now ``exec``, ``run`` or ``shell`` into the SIF version via Singularity. See :ref:`Interact with images<quick-start>`_. 
+In translating to SIF, individual layers of the Docker image have been *combined* into a single, native file for use via Singularity; there is no need to subsequently ``build`` the image for Singularity. For example, you can now ``exec``, ``run`` or ``shell`` into the SIF version via Singularity. See :ref:`Interact with images <quick-start>`. 
 
 .. TODO improve ref above to quick start ... interact 
     .. Should explain here or in previous section that docker to Singularity is 
@@ -95,7 +95,7 @@ In translating to SIF, individual layers of the Docker image have been *combined
 
 ``inspect`` reveals metadata for the container encapsulated via SIF:
 
-.. code-block::
+.. code-block:: none
 
         $ singularity inspect lolcow_latest.sif 
 
@@ -109,7 +109,7 @@ In translating to SIF, individual layers of the Docker image have been *combined
 
 SIF files built from Docker images are *not* crytographically signed:
 
-.. code-block::
+.. code-block:: none
 
     $ singularity verify lolcow_latest.sif 
     Verifying image: lolcow_latest.sif
